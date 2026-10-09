@@ -1219,7 +1219,8 @@ function frame(ts) {
 // ---------- Barre de commandes (décomposition) ----------
 addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b) b.blur(); });
 // Mains virtuelles, trois états : aucune / avec trajectoires (doigts repliés, repères, chemins) / sans trajectoires (doigts tendus, ni repères ni chemins)
-function setHandsMode(m) { handsMode = m; showHands = m !== 'off'; showTraj = curlFingers = m === 'traj'; markPlan(); }
+function setHandsMode(m) { handsMode = m; showHands = m !== 'off'; fingIllus = m === 'off'; // sans mains : doigtés en pastilles (bulles) sur le clavier
+  showTraj = curlFingers = m === 'traj'; markPlan(); }
 function cycleHandsMode() { setHandsMode(handsMode === 'traj' ? 'plain' : handsMode === 'plain' ? 'off' : 'traj'); }
 function toggleRoll() { rollVisible = !rollVisible; }
 function togglePanel() { panelOpen = !panelOpen; $('panel').hidden = !panelOpen; }
