@@ -9,7 +9,7 @@ En ligne : https://seb102.github.io/pour-m-amine/ — ou en local : ouvrir `inde
 - **⏮** retour au début · **▶ Lecture / ⏸ Pause** (Espace) · ← → : mesure précédente / suivante.
 - **Vitesse** : curseur de ¼× à 1× (1× au départ ; ↑ ↓ pour affiner).
 - **Tempo ♩ =** : tempo de départ de la partition, modifiable (↺ pour le retrouver).
-- **Main** D / G / 2 : afficher une main ou les deux (M) ; le son des deux mains reste toujours audible.
+- **M.G.** et **M.D.** : deux boutons, allumés au départ, qu'on éteint / rallume séparément (une main éteinte n'apparaît ni sur le rouleau ni sur le clavier) ; le son des deux mains reste toujours audible.
 - **Mesures visibles** : 1 (au départ) ou 2 mesures dans le rouleau.
 - **supprimer mains virtuelles** : masque / réaffiche les mains virtuelles (les mains d'origine, doigts tendus, sans trajectoires ni repères d'anticipation).
 - **Curseur de position** (sous la barre) : glisser pour rembobiner ou avancer ; une bulle indique le numéro de mesure correspondant (au survol comme pendant le déplacement). **⛶ Plein écran**.

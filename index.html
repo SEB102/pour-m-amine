@@ -95,7 +95,7 @@
       <button id="tempoReset" title="Revenir au tempo de la partition">↺</button></div>
     <div class="sepv"></div>
     <div class="grp"><span class="lab">Main</span>
-      <button id="bhR" title="Main droite seule (M)">D</button><button id="bhL" title="Main gauche seule (M)">G</button><button id="bh2" title="Les deux mains (M)">2</button></div>
+      <button id="bhL" title="Afficher / masquer la main gauche">M.G.</button><button id="bhR" title="Afficher / masquer la main droite">M.D.</button></div>
     <div class="sepv"></div>
     <div class="grp"><label for="vis" class="lab">Mesures visibles</label><select id="vis"><option selected>1</option><option>2</option></select></div>
     <div class="sepv"></div>
@@ -106,8 +106,8 @@
     <span id="title">Aucun morceau</span>
     <span id="progwrap"><input id="progress" title="Curseur de position : faire glisser pour rembobiner ou avancer ; la bulle donne le numéro de mesure" type="range" min="0" max="1" step="0.001" value="0" disabled><span id="mbubble" hidden></span></span>
     <span id="info">—</span>
-    <span class="legend" title="Orange = main droite, bleu = main gauche"><span class="sw" style="background:var(--R)"></span>M.D.
-      <span class="sw" style="background:var(--L);margin-left:10px"></span>M.G.</span>
+    <span class="legend" title="Orange = main droite, bleu = main gauche"><span class="sw" style="background:var(--L)"></span>M.G.
+      <span class="sw" style="background:var(--R);margin-left:10px"></span>M.D.</span>
     <button id="fs" title="Afficher toute l'application en plein écran (Échap pour quitter)">⛶ Plein écran</button>
   </div>
 </header>
@@ -133,12 +133,12 @@ const beatSec = () => song.timeline.tickToSec(Math.round(song.ppq * 4 / song.mea
 const startPos = () => countIn ? -beatSec() * song.measures[0].num : 0;
 let song = null, pos = 0, playing = false, speed = 0.5, visMeasures = 1, nextIdx = 0, lastTs = 0, seeking = false;
 // ---- décomposition du geste : tout est désactivable depuis la barre de commandes
-let rollVisible = true, panelOpen = false, handView = 'both', keepOther = true;
+let rollVisible = true, panelOpen = false, showL = true, showR = true, keepOther = true;
 let anticip = false, handsMode = 'plain', slowN = 0, slowLast = 0, preListen = false, countIn = false, showTraj = false, curlFingers = false, zoomAuto = true;
 let handScale = 2.4, preIdx = 0, lastBeat = 0;
 const PRE_LEAD = 0.7; // PRE_LEAD : avance de la pré-écoute (secondes réelles)
 const VIEW = { x0: 0, n: 1 };                       // fenêtre visible du clavier, en touches blanches (fractionnaire : le zoom est continu)
-const visibleHands = () => handView === 'both' ? ['R', 'L'] : [handView];
+const visibleHands = () => [showR && 'R', showL && 'L'].filter(Boolean);
 
 // ---------- Clavier 88 touches ----------
 let FIRST = 21, LAST = 108; // étendue affichée : tout le piano tant qu'aucun morceau n'est chargé, puis adaptée au morceau
@@ -215,7 +215,7 @@ function audioLatency() {
 }
 function playNote(n, quiet, durOverride) { // quiet = c'est la pré-écoute (anticipation) ; quand la pré-écoute est active, le son de la frappe est supprimé : on n'entend qu'elle
   if (!quiet && preListen) return;
-  if (handView !== 'both' && !keepOther && noteHand(n) !== handView) return;   // une seule main : l'autre peut être coupée
+  if (!keepOther && !visibleHands().includes(noteHand(n))) return;   // main masquée : son coupé si « son de l'autre » est éteint
   if (!quiet) stats.played++;
   const dur = durOverride || Math.min(60, Math.max(0.06, (n.t1 - n.t0) / speed)); // vitesse 0 : jamais appelée (cf. frame)
   const vel = n.vel;
@@ -532,8 +532,7 @@ addEventListener('keydown', e => {
   if (exp.active) { if (e.code === 'Escape') stopExport(true); return; }
   if (e.target.tagName === 'INPUT' && e.target.type !== 'range' || e.target.tagName === 'SELECT') return;
   const k = e.metaKey || e.ctrlKey || e.altKey ? '' : e.key.toLowerCase();
-  if (k === 'm') cycleHand();
-  else if (e.code === 'Space') { e.preventDefault(); unlockAudio(); if (playing) pause(); else play(); }
+  if (e.code === 'Space') { e.preventDefault(); unlockAudio(); if (playing) pause(); else play(); }
   else if (e.code === 'Home') { e.preventDefault(); rewind(); }
   else if (e.code === 'ArrowLeft') { e.preventDefault(); seekMeasures(-1); }
   else if (e.code === 'ArrowRight') { e.preventDefault(); seekMeasures(1); }
@@ -1224,13 +1223,12 @@ function setHandsMode(m) { handsMode = m; showHands = m !== 'off'; showTraj = cu
 function cycleHandsMode() { setHandsMode(handsMode === 'traj' ? 'plain' : handsMode === 'plain' ? 'off' : 'traj'); }
 function toggleRoll() { rollVisible = !rollVisible; }
 function togglePanel() { panelOpen = !panelOpen; $('panel').hidden = !panelOpen; }
-function cycleHand() { handView = handView === 'both' ? 'R' : handView === 'R' ? 'L' : 'both'; }
 // Texte réécrit seulement s'il change : remplacer le contenu d'un bouton à chaque image peut faire perdre le clic (Safari)
 const setT = (e, t) => { if (e.textContent !== t) e.textContent = t; };
 function refreshBar() {
   const on = (id, v) => $(id).classList.toggle('pressed', !!v);
   on('bPre', preListen); on('bCount', countIn); setT($('bM0'), handsMode === 'off' ? 'afficher mains virtuelles' : 'supprimer mains virtuelles'); on('bAnt', anticip); on('bM0', handsMode === 'off');
-  on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhR', handView === 'R'); on('bhL', handView === 'L'); on('bh2', handView === 'both');
+  on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhL', showL); on('bhR', showR);
   [['bs25', 0.25], ['bs50', 0.5], ['bs75', 0.75], ['bs100', 1]].forEach(([id, v]) => on(id, Math.abs(speed - v) < 1e-9));
   setT($('bPlay'), playing ? '⏸ Pause' : '▶ Lecture'); on('bPlay', playing);
   setT($('bSpd'), '×' + speed.toFixed(2).replace('.', ','));
@@ -1240,7 +1238,7 @@ function refreshBar() {
 $('bRew').onclick = rewind;
 $('bPlay').onclick = () => { unlockAudio(); if (playing) pause(); else play(); };
 $('bSld').oninput = () => setSpeed(+$('bSld').value);
-$('bhR').onclick = () => { handView = 'R'; }; $('bhL').onclick = () => { handView = 'L'; }; $('bh2').onclick = () => { handView = 'both'; };
+$('bhL').onclick = () => { showL = !showL; }; $('bhR').onclick = () => { showR = !showR; };
 $('bM0').onclick = () => setHandsMode(handsMode === 'off' ? 'plain' : 'off');
 
 // ---------- Démarrage ----------
