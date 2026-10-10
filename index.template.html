@@ -1243,6 +1243,7 @@ function togglePanel() { panelOpen = !panelOpen; $('panel').hidden = !panelOpen;
 // Texte réécrit seulement s'il change : remplacer le contenu d'un bouton à chaque image peut faire perdre le clic (Safari)
 const setT = (e, t) => { if (e.textContent !== t) e.textContent = t; };
 function refreshBar() {
+  ['bM0', 'vis'].forEach(id => { const b = $(id); if (b && b.disabled !== view3dOn) b.disabled = view3dOn; });   // grisés en vue 3D (mains virtuelles et mesures visibles sans effet)
   const on = (id, v) => $(id).classList.toggle('pressed', !!v);
   on('bPre', preListen); on('bCount', countIn); setT($('bM0'), handsMode === 'off' ? 'afficher mains virtuelles' : 'supprimer mains virtuelles'); on('bAnt', anticip); on('bM0', handsMode === 'off');
   on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhL', showL); on('bhR', showR);
