@@ -76,9 +76,11 @@
   body.dragging #drop { display:flex; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-<script src="core.js?v=20261010c"></script>
-<script src="hands.js?v=20261010c"></script>
-<script src="hands_legacy.js?v=20261010c"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="view3d.js?v=20261010d"></script>
+<script src="core.js?v=20261010d"></script>
+<script src="hands.js?v=20261010d"></script>
+<script src="hands_legacy.js?v=20261010d"></script>
 </head>
 <body>
 <header>
@@ -99,7 +101,7 @@
     <div class="sepv"></div>
     <div class="grp"><label for="vis" class="lab">Mesures visibles</label><select id="vis"><option selected>1</option><option>2</option></select></div>
     <div class="sepv"></div>
-    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">supprimer mains virtuelles</button></div>
+    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">supprimer mains virtuelles</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en volume ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button></div>
     <span id="bInfo"></span><span id="status"></span>
   </div>
   <div class="row">
@@ -533,6 +535,7 @@ addEventListener('keydown', e => {
   else if (e.code === 'ArrowRight') { e.preventDefault(); seekMeasures(1); }
   else if (e.code === 'ArrowUp' && e.target.type !== 'range') { e.preventDefault(); setSpeed(speed + 0.05); }
   else if (e.code === 'ArrowDown' && e.target.type !== 'range') { e.preventDefault(); setSpeed(speed - 0.05); }
+  else if (k === 'v') toggle3D();
 });
 
 // ---------- Chargement de fichiers ----------
@@ -1211,6 +1214,7 @@ function frame(ts) {
   if (exp.active && exp.started) exportTick(ts);
   try { updateZoom(dt); } catch (err) { reportDrawError(err); }
   try { draw(); } catch (err) { reportDrawError(err); }
+  try { render3D(); } catch (err) { reportDrawError(err); }
   { const d = performance.now() - frameT0; if (d > 250) { slowN++; slowLast = Math.round(d); } }   // images très lentes : comptées et affichées dans la barre // une erreur de dessin ne doit JAMAIS arrêter la boucle (donc le son : les notes sont déclenchées plus haut)
   requestAnimationFrame(frame);
 }
@@ -1221,6 +1225,18 @@ addEventListener('click', e => { const b = e.target.closest && e.target.closest(
 function setHandsMode(m) { handsMode = m; showHands = m !== 'off';
   showTraj = curlFingers = m === 'traj'; markPlan(); }
 function cycleHandsMode() { setHandsMode(handsMode === 'traj' ? 'plain' : handsMode === 'plain' ? 'off' : 'traj'); }
+// ---------- Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en volume (glisser pour tourner, molette pour zoomer, double-clic pour revenir) ----------
+let view3dOn = false;
+function toggle3D() {
+  if (typeof THREE === 'undefined' || typeof View3D === 'undefined') { showError('Vue 3D indisponible : la bibliothèque Three.js n\'a pas pu être chargée (connexion ?).'); return; }
+  if (!View3D.el()) View3D.init($('cv').parentElement);
+  view3dOn = !view3dOn; View3D.el().style.display = view3dOn ? 'block' : 'none'; $('b3d').classList.toggle('pressed', view3dOn);
+}
+function render3D() {
+  if (!view3dOn || !song) return;
+  ensurePlan();
+  View3D.render({ song, sp: pos - vlag * speed, plan: song.plan, vis: visibleHands(), noteHand, lowerBoundSec, ux: PianoHands.ux, isBlack: PianoHands.isBlack });
+}
 function toggleRoll() { rollVisible = !rollVisible; }
 function togglePanel() { panelOpen = !panelOpen; $('panel').hidden = !panelOpen; }
 // Texte réécrit seulement s'il change : remplacer le contenu d'un bouton à chaque image peut faire perdre le clic (Safari)
@@ -1239,7 +1255,7 @@ $('bRew').onclick = rewind;
 $('bPlay').onclick = () => { unlockAudio(); if (playing) pause(); else play(); };
 $('bSld').oninput = () => setSpeed(+$('bSld').value);
 $('bhL').onclick = () => { showL = !showL; }; $('bhR').onclick = () => { showR = !showR; };
-$('bM0').onclick = () => setHandsMode(handsMode === 'off' ? 'plain' : 'off');
+$('b3d').onclick = toggle3D; $('bM0').onclick = () => setHandsMode(handsMode === 'off' ? 'plain' : 'off');
 
 // ---------- Démarrage ----------
 setSpeed(1); refreshFingButton(); refreshButtons(); initSampler(); openExemple(PARTITION_B64, 'Grille cool de Dorian');   // l'unique partition est chargée au démarrage

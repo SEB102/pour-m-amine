@@ -23,3 +23,5 @@ Licence **CC BY-NC 4.0** (Attribution - Pas d'Utilisation Commerciale), © 2026 
 Sons de piano : Salamander Grand Piano V3 par Alexander Holm, CC BY 3.0, chargés depuis Internet via Tone.js (MIT).
 
 Fichiers : `index.html` (généré : `node construire.js`), `index.template.html` (source), `core.js` (lecture MusicXML), `hands.js` et `hands_legacy.js` (mains virtuelles), `partition.musicxml`, `test_core.js`, `test_hands.js` et `exemples.js` (tests : `node test_core.js && node test_hands.js`).
+
+- **Vue 3D** : bouton « vue 3D » (touche V) : clavier en perspective, rouleau qui s'éloigne derrière le clavier, mains en volume ; glisser pour tourner, molette pour zoomer, double-clic pour revenir à la vue de départ. Nécessite Internet (bibliothèque Three.js).
