@@ -191,7 +191,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering default-x="6.5" default-y="55.53">MD4</fingering>
+            <fingering default-x="6.5" default-y="55.53">MD3</fingering>
             </technical>
           </notations>
         </note>
@@ -250,7 +250,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering default-x="6.5" default-y="55.53">MD4</fingering>
+            <fingering default-x="6.5" default-y="55.53">MD3</fingering>
             </technical>
           </notations>
         </note>
@@ -933,7 +933,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering default-x="6.5" default-y="55.5">MD4</fingering>
+            <fingering default-x="6.5" default-y="55.5">MD3</fingering>
             </technical>
           </notations>
         </note>
@@ -992,7 +992,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering default-x="6.5" default-y="55.53">MD4</fingering>
+            <fingering default-x="6.5" default-y="55.53">MD3</fingering>
             </technical>
           </notations>
         </note>

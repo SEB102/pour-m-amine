@@ -133,5 +133,19 @@ const near = (a, b, e = 1e-6) => assert.ok(Math.abs(a - b) < e, a + ' ≠ ' + b)
     assert.ok(g.includes('PianoHands.enforceFingerOrder'), 'handGeometry (2D) doit appeler PianoHands.enforceFingerOrder');
     assert.ok(v3.includes('PianoHands.enforceFingerOrder'), 'view3d.js doit appeler PianoHands.enforceFingerOrder');
   });
+  const gamme = (base, h) => { const deg = [0, 2, 4, 5, 7, 9, 11], up = []; for (let k = 0; k < 15; k++) up.push(base + 12 * Math.floor(k / 7) + deg[k % 7]); const seq = up.concat(up.slice().reverse()), ns = mk(seq, 0.4, 0.38); H.assignFingerings(ns, h); return ns.map(n => n.af); };
+  await t('Gamme de do majeur sur deux octaves (règle de gamme) : main droite 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 en montant et 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 en descendant ; main gauche 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 en montant et 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 en descendant', () => {
+    const rh = gamme(60, 'R'), lh = gamme(48, 'L');
+    assert.deepStrictEqual(rh.slice(0, 15), [1, 2, 3, 1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 4, 5]); assert.deepStrictEqual(rh.slice(15), [5, 4, 3, 2, 1, 3, 2, 1, 4, 3, 2, 1, 3, 2, 1]);
+    assert.deepStrictEqual(lh.slice(0, 15), [5, 4, 3, 2, 1, 3, 2, 1, 4, 3, 2, 1, 3, 2, 1]); assert.deepStrictEqual(lh.slice(15), [1, 2, 3, 1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 4, 5]);
+  });
+  await t('Arpège de trois notes (racine, quinte ou octave, tierce ou octave) : main gauche 5 2 1, main droite 1 2 5 (la2 mi3 la3 ; mi2 mi3 sol♯3 ; la3 mi4 la4)', () => {
+    const f = (ms, h) => { const ns = mk(ms, 0.25, 0.3); H.assignFingerings(ns, h); return ns.map(n => n.af); };
+    assert.deepStrictEqual(f([45, 52, 57], 'L'), [5, 2, 1]); assert.deepStrictEqual(f([40, 52, 56], 'L'), [5, 2, 1]); assert.deepStrictEqual(f([57, 64, 69], 'R'), [1, 2, 5]);
+  });
+  await t('Dorian, mesure 1 main droite : sol 1, la 2, si 3 (MD3 dans la partition : la position naturelle sol-la-si sous les doigts 1-2-3)', async () => {
+    const s = await C.loadSong('p.musicxml', fs.readFileSync(__dirname + '/partition.musicxml')), rh = s.notes.filter(n => (n.fh || n.hand) === 'R').sort((a, b) => a.t0 - b.t0); H.assignFingerings(rh, 'R');
+    assert.deepStrictEqual(rh.slice(0, 3).map(n => n.midi + '/' + (n.finger || n.af)), ['57/2', '59/3', '55/1']);
+  });
   console.log(`\n${n} tests passés`);
 })();
