@@ -112,7 +112,7 @@
     <div class="sepv"></div>
     <div class="grp"><label for="vis" class="lab">Mesures visibles</label><select id="vis"><option selected>1</option><option>2</option></select></div>
     <div class="sepv"></div>
-    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">supprimer mains virtuelles</button> <button id="bFing" title="Masquer ou afficher les doigtés (numéros sur les notes et sur le clavier)">supprimer doigtés</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> </div>
+    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">masquer les mains virtuelles</button> <button id="bFing" title="Masquer ou afficher les doigtés (numéros sur les notes et sur le clavier)">masquer les doigtés</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> </div>
     <div class="sepv"></div>
     <div class="grp"><label class="btn" for="file" title="Ouvrir une partition (.mid, .musicxml, .xml, .mxl) ; on peut aussi la déposer sur la fenêtre">📂 Ouvrir une partition</label><input id="file" type="file" accept=".mid,.midi,.musicxml,.xml,.mxl"></div>
     <div class="sepv"></div>
@@ -432,7 +432,7 @@ function setHand(n, h) {
   if (n.fh) song.manual.h[noteKey(n)] = n.fh; else delete song.manual.h[noteKey(n)];
   saveManual();
 }
-function refreshFingButton() { document.querySelectorAll('#fingMode button').forEach(b => { b.classList.toggle('pressed', b.dataset.m === fingMode); b.disabled = !song; }); const bf = $('bFing'); setT(bf, showFing ? 'supprimer doigtés' : 'afficher doigtés'); bf.classList.toggle('pressed', !showFing); bf.disabled = !song; }
+function refreshFingButton() { document.querySelectorAll('#fingMode button').forEach(b => { b.classList.toggle('pressed', b.dataset.m === fingMode); b.disabled = !song; }); const bf = $('bFing'); setT(bf, showFing ? 'masquer les doigtés' : 'afficher les doigtés'); bf.classList.toggle('pressed', !showFing); bf.disabled = !song; }
 function markFpop() {
   const n = selNote, p = $('fpop');
   const simple = fingMode === 'simple';
@@ -1415,7 +1415,7 @@ const setT = (e, t) => { if (e.textContent !== t) e.textContent = t; };
 function refreshBar() {
   ['bM0', 'vis'].forEach(id => { const b = $(id); if (b && b.disabled !== view3dOn) b.disabled = view3dOn; });   // grisés en vue 3D (mains virtuelles et mesures visibles sans effet)
   const on = (id, v) => $(id).classList.toggle('pressed', !!v);
-  on('bPre', preListen); on('bCount', countIn); setT($('bM0'), handsMode === 'off' ? 'afficher mains virtuelles' : 'supprimer mains virtuelles'); on('bAnt', anticip); on('bM0', handsMode === 'off');
+  on('bPre', preListen); on('bCount', countIn); setT($('bM0'), handsMode === 'off' ? 'afficher les mains virtuelles' : 'masquer les mains virtuelles'); on('bAnt', anticip); on('bM0', handsMode === 'off');
   on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhL', showL); on('bhR', showR);
   [['bs25', 0.25], ['bs50', 0.5], ['bs75', 0.75], ['bs100', 1]].forEach(([id, v]) => on(id, Math.abs(speed - v) < 1e-9));
   setT($('bPlay'), playing ? '⏸ Pause' : '▶ Lecture'); on('bPlay', playing);
