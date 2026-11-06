@@ -80,6 +80,7 @@
   .seg button { border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; padding:7px 11px; }
   .seg button.pressed { background:var(--accent); font-weight:600; }
   button.pressed { background:var(--accent); border-color:var(--accent); }
+  #toast { position:fixed; left:50%; bottom:90px; transform:translateX(-50%); z-index:9; background:#0b0e1c; border:1px solid var(--accent); border-radius:10px; padding:9px 16px; box-shadow:0 6px 20px rgba(0,0,0,.5); max-width:92vw; text-align:center; display:none; }
   #drop { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(91,124,255,.25);
           border:3px dashed var(--accent); font-size:22px; z-index:5; pointer-events:none; }
   body.dragging #drop { display:flex; }
@@ -87,7 +88,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="view3d.js?v=0522ce33"></script>
-<script src="core.js?v=90b9c1a2"></script>
+<script src="core.js?v=781c2873"></script>
 <script src="hands.js?v=9ace1c6e"></script>
 <script src="hands_legacy.js?v=f03dbe32"></script>
 </head>
@@ -111,7 +112,11 @@
     <div class="sepv"></div>
     <div class="grp"><label for="vis" class="lab">Mesures visibles</label><select id="vis"><option selected>1</option><option>2</option></select></div>
     <div class="sepv"></div>
-    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">supprimer mains virtuelles</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> </div>
+    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">supprimer mains virtuelles</button> <button id="bFing" title="Masquer ou afficher les doigtés (numéros sur les notes et sur le clavier)">supprimer doigtés</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> </div>
+    <div class="sepv"></div>
+    <div class="grp"><label class="btn" for="file" title="Ouvrir une partition (.mid, .musicxml, .xml, .mxl) ; on peut aussi la déposer sur la fenêtre">📂 Ouvrir une partition</label><input id="file" type="file" accept=".mid,.midi,.musicxml,.xml,.mxl"></div>
+    <div class="sepv"></div>
+    <div class="grp"><button id="fingImp" title="Importer des doigtés depuis un fichier (remplace les actuels)">importer les doigtés</button><button id="fingExp" title="Exporter les doigtés : enregistre la partition avec vos doigtés (fichier MusicXML : s'ouvre dans MuseScore, qui peut l'enregistrer en .mscz ; on peut la rouvrir ici avec Ouvrir une partition). Disponible pour les fichiers MusicXML / .mxl">exporter les doigtés</button><input id="fingFile" type="file" accept=".json,application/json"></div>
     <span id="bInfo"></span><span id="status"></span>
   </div>
   <div class="row">
@@ -125,8 +130,10 @@
 </header>
 <main>
   <canvas id="cv"></canvas>
-  <div id="gpop"><span id="gcount"></span><span class="sep"></span><button data-gh="R" title="Affecter ces notes à la main droite">M.D.</button><button data-gh="L" title="Affecter ces notes à la main gauche">M.G.</button><button id="gcancel" title="Annuler la sélection (Échap)">✕</button></div>
+  <div id="gpop"><span id="gcount"></span><span class="sep"></span><button data-gh="R" title="Affecter ces notes à la main droite">M.D.</button><button data-gh="L" title="Affecter ces notes à la main gauche">M.G.</button><button id="gcopy" title="Copier les doigtés de ces notes, puis cliquer sur la première note du passage où les coller">⎘ copier les doigtés</button><button id="gcancel" title="Annuler la sélection (Échap)">✕</button></div>
   <div id="fpop"><button data-h="R" title="Main droite (touche D)">M.D.</button><button data-h="L" title="Main gauche (touche G)">M.G.</button><span class="sep"></span><span id="rake"></span><span id="nums"><button data-f="1">1</button><button data-f="2">2</button><button data-f="3">3</button><button data-f="4">4</button><button data-f="5">5</button></span><button data-f="0" title="Effacer le doigté">✕</button><span class="sep"></span><span class="sublab" title="Changement de doigt sur la touche tenue : le doigt de départ est remplacé par celui-ci en cours de note">puis</span><span id="nums2"><button data-s="1">1</button><button data-s="2">2</button><button data-s="3">3</button><button data-s="4">4</button><button data-s="5">5</button></span><button data-s="0" title="Pas de changement de doigt">✕</button></div>
+  <div id="toast"></div>
+  <div id="drop">Déposez un fichier .mid / .musicxml / .mxl</div>
 </main>
 <footer>Pour M. Amine · Sébastien Gay · Octobre 2026 · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" target="_blank" rel="noopener">Licence CC BY-NC 4.0</a><br>Piano : <a href="https://github.com/sfzinstruments/SalamanderGrandPiano" target="_blank" rel="noopener">Salamander Grand Piano V3</a> par Alexander Holm (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>)</footer>
 
@@ -361,7 +368,7 @@ function refreshButtons() {
   $('play').disabled = !song || playing || x; $('stop').disabled = !playing || x; $('rew').disabled = !song || x;
   $('progress').disabled = !song || x; $('speed').disabled = x; $('speed1').disabled = x; $('speedq').disabled = x; $('speedh').disabled = x; $('demo').disabled = x; $('demo2').disabled = x; $('demo3').disabled = x;
   $('file').disabled = x; $('export').disabled = !song; $('xres').disabled = x;
-  refreshFingButton(); $('fingExp').disabled = !song; $('fingImp').disabled = !song || x;
+  refreshFingButton(); $('fingExp').disabled = !song || !song.sourceXml; $('fingImp').disabled = !song || x;
   $('tempo').disabled = !song || x; $('tempoReset').disabled = !song || x;
   $('export').textContent = x ? '⏹ Annuler l\'export' : '🎬 Export vidéo';
 }
@@ -381,7 +388,7 @@ $('autoFing').onchange = e => { autoFing = e.target.checked; markPlan(); };
 // ---------- Doigtés ----------
 // Source : doigtés inscrits dans le MusicXML (n.fileFinger) + saisie manuelle (song.manual, mémorisée par morceau dans le navigateur).
 let fingMode = 'simple', lastOn = 'simple', showFing = true, fingIllus = false, selNote = null; const hit = [];
-let showHands = true, autoFing = false, planDirty = true; // mains virtuelles ; doigtés calculés pour les notes sans doigté ; plan des mains à recalculer
+let showHands = true, autoFing = true, planDirty = true; // mains virtuelles ; doigtés calculés pour les notes sans doigté ; plan des mains à recalculer
 const markPlan = () => { planDirty = true; if (song) song.evt = null; };
 const fof = n => n.finger || (autoFing ? n.af || 0 : 0); // doigt effectif : celui du fichier / saisi, sinon celui proposé
 const rollHeight = H => rollVisible ? H - (showHands ? Math.min(500, Math.max(250, H * 0.52)) : Math.min(420, Math.max(170, H * 0.42))) : Math.min(80, Math.max(48, H * 0.09)); // rouleau masqué : un ruban mince
@@ -425,7 +432,7 @@ function setHand(n, h) {
   if (n.fh) song.manual.h[noteKey(n)] = n.fh; else delete song.manual.h[noteKey(n)];
   saveManual();
 }
-function refreshFingButton() { document.querySelectorAll('#fingMode button').forEach(b => { b.classList.toggle('pressed', b.dataset.m === fingMode); b.disabled = !song; }); }
+function refreshFingButton() { document.querySelectorAll('#fingMode button').forEach(b => { b.classList.toggle('pressed', b.dataset.m === fingMode); b.disabled = !song; }); const bf = $('bFing'); setT(bf, showFing ? 'supprimer doigtés' : 'afficher doigtés'); bf.classList.toggle('pressed', !showFing); bf.disabled = !song; }
 function markFpop() {
   const n = selNote, p = $('fpop');
   const simple = fingMode === 'simple';
@@ -456,9 +463,19 @@ cv.addEventListener('wheel', e => { if (!song || exp.active) return; const [, y]
 let tScroll = null;
 cv.addEventListener('touchstart', e => { if (e.touches.length !== 1 || !song || exp.active) { tScroll = null; return; } const [, y] = canvasXY(e.touches[0]); tScroll = y > rollBottom() ? null : { y: e.touches[0].clientY, moved: false }; }, { passive: true });
 cv.addEventListener('touchmove', e => { if (!tScroll || e.touches.length !== 1) return; const cy = e.touches[0].clientY, dy = cy - tScroll.y; if (!tScroll.moved && Math.abs(dy) < 6) return; tScroll.moved = true; tScroll.y = cy; e.preventDefault(); scrollRollBy(dy / Math.max(1, rollBottom() * cv.getBoundingClientRect().height / cssH)); }, { passive: false });   // le contenu suit le doigt : glisser vers le bas fait avancer le temps
-cv.addEventListener('touchend', () => { tScroll = null; }, { passive: true });
+// double-toucher sur le rouleau (smartphone) : lecture / pause, comme la barre d'espace (hors d'une note : un toucher sur une note ouvre la saisie du doigté)
+let lastTap = null;
+cv.addEventListener('touchend', e => {
+  const moved = tScroll && tScroll.moved; tScroll = null;
+  if (moved || !song || exp.active || e.touches.length || e.changedTouches.length !== 1) { lastTap = null; return; }
+  const [x, y] = canvasXY(e.changedTouches[0]); if (y > rollBottom() || hit.some(h => x >= h.x && x <= h.x + h.w && y >= h.top && y <= h.bottom)) { lastTap = null; return; }
+  const now = performance.now();
+  if (lastTap && now - lastTap.t < 350 && Math.hypot(x - lastTap.x, y - lastTap.y) < 30) { lastTap = null; hideFpop(); clearGroup(); unlockAudio(); if (playing) pause(); else play(); return; }
+  lastTap = { t: now, x, y };
+}, { passive: true });
+cv.style.touchAction = 'manipulation';   // pas de zoom au double-toucher
 cv.addEventListener('mousedown', e => {
-  if (!song || exp.active || e.button !== 0 || e.shiftKey) return;   // doigtés en lecture seule : pas de sélection de groupe, le glisser sert au défilement
+  if (!song || exp.active || e.button !== 0) return;
   const [x, y] = canvasXY(e); if (y > rollBottom()) return;
   dragStart = { x, y, moved: false, scroll: !e.shiftKey, lastY: y };   // glisser = faire défiler le rouleau ; Maj + glisser = sélectionner un groupe de notes
 });
@@ -476,6 +493,7 @@ addEventListener('mouseup', () => {
   justDragged = true; setTimeout(() => { justDragged = false; }, 0); // le « click » qui suit le relâchement ne doit rien faire
   if (wasScroll) return;
   if (!selGroup.size) { clearGroup(); return; }
+  if (pasteBuf && pasteArmed) { const dest = [...selGroup]; clearGroup(); doPaste(dest); return; }   // mode collage : le rectangle choisit lui-même les notes de destination
   const g = $('gpop'); $('gcount').textContent = selGroup.size + (selGroup.size > 1 ? ' notes' : ' note');
   g.style.display = 'flex'; const w = g.offsetWidth, h = g.offsetHeight, below = selRect.y + selRect.h + 8;
   g.style.left = Math.max(4, Math.min(cssW - w - 4, selRect.x + selRect.w / 2 - w / 2)) + 'px';
@@ -485,7 +503,20 @@ addEventListener('mouseup', () => {
 $('gpop').addEventListener('click', e => {
   const b = e.target.closest('button[data-gh]');
   if (b) { selGroup.forEach(n => setHand(n, b.dataset.gh)); clearGroup(); } else if (e.target.closest('#gcancel')) clearGroup();
+  else if (e.target.closest('#gcopy')) { copyFingerings([...selGroup]); clearGroup(); pasteArmed = true; toast('Doigtés de ' + pasteBuf.length + (pasteBuf.length > 1 ? ' notes copiés' : ' note copié') + ' : cliquez sur la <b>note de départ</b> du collage, ou sélectionnez (Maj + glisser) les notes de destination (Échap pour annuler) — ou ' + MOD + ' + V', 0); }
 });
+// ---------- Copier les doigtés d'un passage vers un autre ----------
+let pasteBuf = null, pasteArmed = false, tToast = null;   // pasteBuf : doigtés copiés (instantané, collable plusieurs fois) ; pasteArmed : le prochain clic sur une note / la prochaine sélection colle (bouton « copier »)
+const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+function copyFingerings(notes) { pasteBuf = notes.map(n => ({ midi: n.midi, tick: n.tick, hand: noteHand(n), finger: fof(n) })); }   // instantané : reste valable même si les doigtés changent ou si l'on ouvre un autre morceau
+function toast(html, ms) { const t = $('toast'); clearTimeout(tToast); t.innerHTML = html; t.style.display = 'block'; if (ms) tToast = setTimeout(() => { t.style.display = 'none'; }, ms); }
+function cancelPaste() { pasteBuf = null; pasteArmed = false; clearTimeout(tToast); $('toast').style.display = 'none'; }
+function doPaste(target) {   // target : une note (le collage commence là) ou une liste de notes choisies ; la séquence copiée reste dans le presse-papier de l'appli (on peut recoller ailleurs)
+  const r = PianoHands.pasteFingerings(song.notes, pasteBuf, target, { hand: noteHand, shown: n => n.finger || 0 });
+  r.pairs.forEach(p => setFinger(p.n, p.f)); pasteArmed = false;
+  const mains = { R: 'main droite', L: 'main gauche' }, ch = r.fromHand && r.fromHand !== r.toHand ? ' (' + mains[r.fromHand] + ' → ' + mains[r.toHand] + ')' : '';
+  toast(r.pairs.length ? r.pairs.length + (r.pairs.length > 1 ? ' doigtés collés' : ' doigté collé') + ch + (r.stop ? ' — ' + r.stop + ' : ' + r.copied + ' notes sur ' + r.total : '') + ' — ' + MOD + ' + V pour recoller ailleurs' : 'Rien de collé — ' + (r.stop || 'aucun doigté dans le passage copié'), 7000);
+}
 function hideFpop() { selNote = null; $('fpop').style.display = 'none'; }
 function showFpop(h) {
   clearGroup();
@@ -509,23 +540,22 @@ $('fpop').addEventListener('click', e => {
 });
 $('fingMode').addEventListener('click', e => { const b = e.target.closest('button[data-m]'); if (b && song) setFingMode(b.dataset.m); });
 cv.addEventListener('click', e => {
-  return;   // doigtés en lecture seule
   if (!song || exp.active || justDragged) return;
   if (selGroup.size) clearGroup();
   const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * cssW / r.width, py = (e.clientY - r.top) * cssH / r.height;
   for (let i = hit.length - 1; i >= 0; i--) {
     const h = hit[i];
     if ((px >= h.x && px <= h.x + h.w && py >= h.top && py <= h.bottom) || (h.pw && px >= h.px && px <= h.px + h.pw && py >= h.py && py <= h.py + h.ph)) {
-      pause(); showFpop(h); return;
+      pause(); if (pasteBuf && pasteArmed) { doPaste(h.n); return; } showFpop(h); return;
     }
   }
   hideFpop();
 });
 $('fingExp').onclick = () => {
-  const fingerings = {}, mains = {}, changements = {};
-  song.notes.forEach(n => { if (n.finger) fingerings[noteKey(n)] = n.finger; if (n.fh) mains[noteKey(n)] = n.fh; if (n.finger2) changements[noteKey(n)] = n.finger2; });
-  const blob = new Blob([JSON.stringify({ version: 3, titre: song.title, doigtes: fingerings, mains, changements }, null, 1)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (song.title || 'morceau').replace(/[\\/:*?"<>|]+/g, '_') + '.doigtes.json';
+  const xml = PianoCore.injectFingerings(song, n => ({ f: fof(n), f2: n.finger2 || 0, }));   // le fichier d'origine, avec les doigtés affichés (saisis, du fichier ou proposés)
+  if (!xml) { alert("L'export de la partition est disponible pour les fichiers MusicXML (.musicxml, .xml, .mxl)."); return; }
+  const blob = new Blob([xml], { type: 'application/vnd.recordare.musicxml+xml' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (song.title || 'morceau').replace(/[\\/:*?"<>|]+/g, '_') + '-doigtes.musicxml';
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
 };
 $('fingImp').onclick = () => $('fingFile').click();
@@ -573,6 +603,19 @@ $('progress').addEventListener('pointerleave', () => { hoverFrac = null; });
 $('progress').oninput = e => { seeking = true; const a = startPos(); seek(a + parseFloat(e.target.value) * (song.durationSec - a)); showMeasureBubble(parseFloat(e.target.value)); };
 $('progress').onchange = () => { seeking = false; };
 addEventListener('keydown', e => {
+  if (song && (e.metaKey || e.ctrlKey) && !e.altKey && !(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {   // ⌘/Ctrl + C : copier les doigtés de la sélection ; ⌘/Ctrl + V : les coller (autant de fois qu'on veut)
+    const kk = e.key.toLowerCase();
+    if (kk === 'c' && (selGroup.size || selNote)) {
+      e.preventDefault(); copyFingerings(selGroup.size ? [...selGroup] : [selNote]); pasteArmed = false;
+      toast(pasteBuf.length + (pasteBuf.length > 1 ? ' notes copiées' : ' note copiée') + ' : choisissez la destination (clic sur une note, ou Maj + glisser) puis ' + MOD + ' + V', 6000); return;
+    }
+    if (kk === 'v' && pasteBuf) {
+      e.preventDefault(); const dest = selGroup.size ? [...selGroup] : selNote ? selNote : null;
+      if (!dest) { toast('Choisissez d\'abord la destination : cliquez sur la note de départ, ou sélectionnez les notes (Maj + glisser), puis ' + MOD + ' + V', 5000); return; }
+      pause(); doPaste(dest); return;
+    }
+  }
+  if (e.key === 'Escape' && pasteArmed) { pasteArmed = false; $('toast').style.display = 'none'; return; }   // annule le collage « au clic » ; la séquence copiée reste collable avec ⌘/Ctrl + V
   if (e.key === 'Escape' && selGroup.size) { clearGroup(); return; }
   if (selNote && !(e.target.tagName === 'INPUT' && e.target.type === 'number')) {
     if (/^[1-5]$/.test(e.key)) { e.preventDefault(); chooseFinger(parseInt(e.key, 10)); return; }
@@ -613,6 +656,14 @@ $('file').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   await openBuffer(f.name, await f.arrayBuffer()); e.target.value = '';
 };
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
+addEventListener('dragleave', e => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', async e => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+  const f = e.dataTransfer.files[0]; if (f) await openBuffer(f.name, await f.arrayBuffer());
+});
 const openExemple = (b64, nom) => {
   const bin = atob(b64); const b = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
@@ -1377,6 +1428,7 @@ $('bPlay').onclick = () => { unlockAudio(); if (playing) pause(); else play(); }
 $('bSld').oninput = () => setSpeed(+$('bSld').value);
 $('bhL').onclick = () => { showL = !showL; }; $('bhR').onclick = () => { showR = !showR; };
 
+$('bFing').onclick = () => setFingMode(showFing ? 'off' : (lastOn || 'simple'));
 $('b3d').onclick = toggle3D; $('bM0').onclick = () => setHandsMode(handsMode === 'off' ? 'plain' : 'off');
 
 // ---------- Démarrage ----------
