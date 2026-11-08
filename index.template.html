@@ -116,7 +116,7 @@
     <div class="sepv"></div>
     <div class="grp"><label class="btn" for="file" title="Ouvrir une partition (.mid, .musicxml, .xml, .mxl) ; on peut aussi la déposer sur la fenêtre">📂 Ouvrir une partition</label><input id="file" type="file" accept=".mid,.midi,.musicxml,.xml,.mxl"></div>
     <div class="sepv"></div>
-    <div class="grp"><button id="fingExp" title="Exporter une partition : enregistre la partition avec vos doigtés (fichier MusicXML : s'ouvre dans MuseScore, qui peut l'enregistrer en .mscz ; on peut la rouvrir ici avec Ouvrir une partition). Pour un fichier MIDI, la partition est construite à partir des notes (rythme approximatif)">exporter une partition</button></div>
+    <div class="grp"><button id="fingExp" title="Exporter une partition : enregistre la partition avec vos doigtés (fichier MusicXML : s'ouvre dans MuseScore, qui peut l'enregistrer en .mscz ; on peut la rouvrir ici avec Ouvrir une partition). Un fichier qui n'est pas déjà une partie de piano à deux portées (MIDI, plusieurs parties…) est réécrit sur deux portées à partir des notes (rythme approximatif)">exporter une partition</button></div>
     <span id="bInfo"></span><span id="status"></span>
   </div>
   <div class="row">
@@ -368,7 +368,7 @@ function refreshButtons() {
   $('play').disabled = !song || playing || x; $('stop').disabled = !playing || x; $('rew').disabled = !song || x;
   $('progress').disabled = !song || x; $('speed').disabled = x; $('speed1').disabled = x; $('speedq').disabled = x; $('speedh').disabled = x; $('demo').disabled = x; $('demo2').disabled = x; $('demo3').disabled = x;
   $('file').disabled = x; $('export').disabled = !song; $('xres').disabled = x;
-  refreshFingButton(); $('fingExp').disabled = !song || !(song.sourceXml || song.format === 'midi');
+  refreshFingButton(); $('fingExp').disabled = !song;
   $('tempo').disabled = !song || x; $('tempoReset').disabled = !song || x;
   $('export').textContent = x ? '⏹ Annuler l\'export' : '🎬 Export vidéo';
 }
