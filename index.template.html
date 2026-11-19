@@ -126,6 +126,10 @@
   #tb button { flex:1; min-height:54px; padding:0 2px; font-size:20px; border-radius:12px; touch-action:manipulation; line-height:1.05; }
   #tb button small { display:block; font-size:11px; color:var(--muted); font-weight:500; }
   #tb button.big { flex:1.5; background:var(--accent); border-color:var(--accent); font-weight:700; } #tb button.big small { color:#fff; }
+  #tSpdBox { flex:2.2; display:flex; flex-direction:column; justify-content:center; gap:2px; padding:0 6px; background:#252b4a; border:1px solid var(--line); border-radius:12px; }
+  #tSpdBox input { width:100%; height:30px; margin:0; }
+  #tSpdBox input::-webkit-slider-thumb { width:26px; height:26px; }
+  #tSpdBox small { font-size:11px; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums; }
   #kz { top:40px; right:6px; } #kz button { min-width:44px; min-height:42px; font-size:16px; }
   button, select { touch-action:manipulation; }
 </style>
@@ -187,7 +191,7 @@
   <div id="saveAsk" hidden role="dialog" aria-modal="true" aria-labelledby="saveAskT"><div class="box"><p id="saveAskT"><b>Voulez-vous enregistrer la partition avec vos doigtés ?</b></p><p class="sub" id="saveAskS">Vous avez modifié des doigtés sans exporter la partition : ils seront perdus si vous quittez la page.</p><div class="btns"><button id="saveNo">Non</button><button id="saveYes" class="primary">Oui, enregistrer</button></div></div></div>
   <div id="drop">Déposez un fichier .mid / .musicxml / .mxl / .mscz</div>
 </main>
-<div id="tb"><button id="tMenu" title="Réglages, partitions">☰<small>Menu</small></button><button id="tRew" title="Retour au début">⏮<small>Début</small></button><button id="tPrev" title="Mesure précédente">◀<small>Mesure</small></button><button id="tPlay" class="big" title="Lecture / pause">▶<small>Lecture</small></button><button id="tNext" title="Mesure suivante">▶<small>Mesure</small></button><button id="tSpd" title="Vitesse">×1<small>Vitesse</small></button></div>
+<div id="tb"><button id="tMenu" title="Réglages, partitions">☰<small>Menu</small></button><button id="tRew" title="Retour au début">⏮<small>Début</small></button><button id="tPlay" class="big" title="Lecture / pause">▶<small>Lecture</small></button><label id="tSpdBox" title="Vitesse de lecture (¼× à 1×)"><input type="range" id="tSpdR" min="0.25" max="1" step="0.05" value="1" aria-label="Vitesse"><small id="tSpdV">×1</small></label></div>
 <footer>Pour M. Amine TEL · Sébastien Gay · Octobre 2026 · <a href="MODE-D-EMPLOI.html" target="_blank" rel="noopener">Mode d'emploi</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" target="_blank" rel="noopener">Licence CC BY-NC 4.0</a><br>Piano : <a href="https://github.com/sfzinstruments/SalamanderGrandPiano" target="_blank" rel="noopener">Salamander Grand Piano V3</a> par Alexander Holm (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>)</footer>
 
 <script>
@@ -396,6 +400,14 @@ function previewTick() {
   }
 }
 // ---- zoom : le clavier suit les mains (fenêtre fractionnaire, lissée)
+// une seule main affichée (M.G. ou M.D.) : le clavier se cadre sur l'empan de cette main sur tout le morceau (de sa note la plus grave à sa plus aiguë, une touche de marge)
+function handSpan(h) {
+  let lo = 127, hi = -1; for (const n of song.notes) if (noteHand(n) === h) { if (n.midi < lo) lo = n.midi; if (n.midi > hi) hi = n.midi; }
+  if (hi < 0) return null;
+  const wi = m => whiteIdx[m] !== undefined ? whiteIdx[m] : whiteIdx[m - 1] !== undefined ? whiteIdx[m - 1] : 0;
+  const l = Math.max(0, wi(lo) - 1), r = Math.min(NW, wi(hi) + 2), n = Math.min(NW, Math.max(8, r - l));
+  return { x0: Math.max(0, Math.min(NW - n, (l + r) / 2 - n / 2)), n };
+}
 function updateZoom(dt) {
   if (!song) return;
   if (!song.span) { // clavier fixe, calé sur l'empan du morceau (plus basse et plus haute notes, une marge de deux touches blanches)
@@ -410,6 +422,7 @@ function updateZoom(dt) {
     const n = keySize; if (keyX0 === null) keyX0 = song.span.x0 + (song.span.n - n) / 2;   // au départ : centré sur le morceau
     keyX0 = Math.max(0, Math.min(NW - n, keyX0)); VIEW.x0 = keyX0; VIEW.n = n;
   }
+  { const vh = visibleHands(); if (!writeOn && vh.length === 1) { const hs = handSpan(vh[0]); if (hs) { VIEW.x0 = hs.x0; VIEW.n = hs.n; } } }   // prioritaire sur le zoom des touches
 }
 function rewind() { pause(); seek(startPos()); }
 function seekMeasures(d) {
@@ -1767,14 +1780,13 @@ const petit = () => innerWidth < 700;
 const SPEEDS = [0.25, 0.5, 0.75, 1], fmtSpd = v => '×' + (v === 0.25 ? '¼' : v === 0.5 ? '½' : v === 0.75 ? '¾' : '1');
 $('tMenu').onclick = () => sheet(!hdr.classList.contains('open'));
 $('tRew').onclick = () => { unlockAudio(); rewind(); };
-$('tPrev').onclick = () => { pause(); seekMeasures(-1); }; $('tNext').onclick = () => { pause(); seekMeasures(1); };
 $('tPlay').onclick = () => $('bPlay').click();
-$('tSpd').onclick = () => { const i = SPEEDS.findIndex(v => Math.abs(v - speed) < 1e-6); setSpeed(SPEEDS[(i + 1) % SPEEDS.length]); };
+$('tSpdR').oninput = e => setSpeed(+e.target.value);
 function refreshTB() {
   const lab = (b, big, sm) => { const h = big + '<small>' + sm + '</small>'; if (b.innerHTML !== h) b.innerHTML = h; };
   lab($('tPlay'), playing ? '⏸' : '▶', playing ? 'Pause' : 'Lecture');
-  lab($('tSpd'), fmtSpd(SPEEDS.reduce((a, v) => Math.abs(v - speed) < Math.abs(a - speed) ? v : a, 1)), 'Vitesse');
-  ['tRew', 'tPrev', 'tNext', 'tPlay'].forEach(id => { $(id).disabled = !song || exp.active; });
+  { const r = $('tSpdR'); if (document.activeElement !== r && Math.abs(+r.value - speed) > 1e-6) r.value = speed; setT($('tSpdV'), 'Vitesse ×' + speed.toFixed(2).replace('.', ',')); }
+  ['tRew', 'tPlay'].forEach(id => { $(id).disabled = !song || exp.active; });
 }
 let libDb = null;
 function libOpen() { return libDb || (libDb = new Promise((ok, ko) => { try { const r = indexedDB.open('pour-m-amine-tel', 1); r.onupgradeneeded = () => r.result.createObjectStore('partitions', { keyPath: 'name' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); } catch (e) { ko(e); } })); }

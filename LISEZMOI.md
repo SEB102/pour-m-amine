@@ -2,7 +2,7 @@
 
 En ligne : https://seb102.github.io/pour-m-amine-tel/ — même moteur que « Pour M. Amine » (lecture des partitions, rouleau, doigtés), interface pensée pour un téléphone tenu d'une main, en portrait. **Pas de mode Écriture** dans cette version.
 
-- **Barre du bas** à gros boutons : ☰ Menu, ⏮ Début, ◀ ▶ mesure précédente / suivante, ▶ Lecture / ⏸ Pause, Vitesse (¼, ½, ¾, 1 à chaque toucher).
+- **Barre du bas** à gros boutons : ☰ Menu, ⏮ Début, ▶ Lecture / ⏸ Pause, curseur de vitesse (de ¼× à 1×).
 - **Menu** : le bandeau devient une feuille qui monte du bas (☰), fermée par ✕ ou en touchant ailleurs ; boutons de 44 px au moins.
 - **Mes partitions** : chaque partition ouverte ou exportée est gardée dans le téléphone (liste en haut du menu, ✕ pour la retirer).
 - **Clavier** : environ un quart de l'écran ; touches **Grandes** d'emblée sur un petit écran (menu Zoom −/+ et ◀ ▶ en haut à droite du rouleau).
