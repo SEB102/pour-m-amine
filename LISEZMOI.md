@@ -1,25 +1,20 @@
-# Pour M. Amine TEL (version téléphone, sans écriture)
+# Pour M. Amine (rouleau de piano d'apprentissage, sans écriture)
 
-En ligne : https://seb102.github.io/pour-m-amine/ — même moteur que « Pour M. Amine » (lecture des partitions, rouleau, doigtés), interface pensée pour un téléphone tenu d'une main, en portrait. **Pas de mode Écriture** dans cette version.
+En ligne : https://seb102.github.io/pour-m-amine/ — pensée d'abord pour le **téléphone** (en portrait, tenu d'une main), utilisable aussi sur ordinateur. Version simplifiée de SEB-ROULPIANO (https://github.com/SEB102/seb-roulpiano), **sans mode Écriture**.
 
 - **Barre du bas** à gros boutons : ☰ Menu, ⏮ Début, ▶ Lecture / ⏸ Pause, curseur de vitesse (de ¼× à 1×).
-- **Menu** : le bandeau devient une feuille qui monte du bas (☰), fermée par ✕ ou en touchant ailleurs ; boutons de 44 px au moins.
-- **Mes partitions** : chaque partition ouverte ou exportée est gardée dans le téléphone (liste en haut du menu, ✕ pour la retirer).
-- **Clavier** : environ un quart de l'écran ; touches **Grandes** d'emblée sur un petit écran (menu Zoom −/+ et ◀ ▶ en haut à droite du rouleau).
-- **Export** : feuille de partage du téléphone (« Enregistrer dans Fichiers », AirDrop, mail…).
-- **Installable et hors connexion** : « Partager › Sur l'écran d'accueil » (iPhone) ; après une première ouverture, l'app fonctionne sans réseau.
-- Le mode d'emploi joint décrit encore les commandes de la version ordinateur (sans la partie écriture).
+- **Menu ☰** : une feuille qui monte du bas, fermée par ✕ ou en touchant ailleurs ; elle contient tous les réglages (ouverture d'une partition, tempo, mains, doigtés, vue 3D, export…) et **Mes partitions** (partitions ouvertes ou exportées, gardées dans l'appareil).
+- **Clavier** : environ un quart de l'écran sur téléphone ; touches **Grandes** d'emblée sur un petit écran (menu flottant Zoom −/+ et ◀ ▶) ; une seule main affichée = clavier cadré sur son empan.
+- **Export** : feuille de partage sur écran tactile (« Enregistrer dans Fichiers », AirDrop, mail…), téléchargement direct à la souris.
+- **Installable, plein écran et hors connexion** : « Partager › Sur l'écran d'accueil » (iPhone) ; plein écran au premier toucher sur Android ; après une première ouverture, l'app fonctionne sans réseau.
 
----
+## Détails
 
-# Pour M. Amine
-
-Version simplifiée de SEB-ROULPIANO (https://github.com/SEB102/seb-roulpiano-tel) : l'application d'origine est conservée telle quelle.
 Elle ne contient qu'une partition, « Grille cool de Dorian » (`partition.musicxml`, avec ses doigtés), chargée au démarrage.
 
 Mode d'emploi illustré : `MODE-D-EMPLOI.html` (autonome, images intégrées) et `MODE-D-EMPLOI.pdf` (même contenu, imprimable) ; lien « Mode d'emploi » en bas de l'application.
 
-En ligne : https://seb102.github.io/pour-m-amine-tel/ — ou en local : ouvrir `index.html` dans Chrome / Safari (double-clic). Internet requis au 1er lancement (échantillons de piano + Tone.js) ; sans connexion, un synthé de secours prend le relais.
+En local : ouvrir `index.html` dans Chrome / Safari (double-clic). Internet requis au 1er lancement (échantillons de piano + Tone.js) ; sans connexion, un synthé de secours prend le relais.
 
 ## Commandes (barre du haut)
 - **⏮** retour au début · **▶ Lecture / ⏸ Pause** (Espace) · ← → : mesure précédente / suivante.

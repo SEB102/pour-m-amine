@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Pour M. Amine">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e1120">
-<title>Pour M. Amine TEL</title>
+<title>Pour M. Amine</title>
 <style>
   :root { --bg:#0e1120; --panel:#171b30; --line:#2a3050; --text:#e8ebf7; --muted:#8d94b3;
           --R:#ff9a2e; --L:#3b9cff; --accent:#5b7cff; }
@@ -192,7 +192,7 @@
   <div id="drop">Déposez un fichier .mid / .musicxml / .mxl / .mscz</div>
 </main>
 <div id="tb"><button id="tMenu" title="Réglages, partitions">☰<small>Menu</small></button><button id="tRew" title="Retour au début">⏮<small>Début</small></button><button id="tPlay" class="big" title="Lecture / pause">▶<small>Lecture</small></button><label id="tSpdBox" title="Vitesse de lecture (¼× à 1×)"><input type="range" id="tSpdR" min="0.25" max="1" step="0.05" value="1" aria-label="Vitesse"><small id="tSpdV">×1</small></label></div>
-<footer>Pour M. Amine TEL · Sébastien Gay · Octobre 2026 · <a href="MODE-D-EMPLOI.html" target="_blank" rel="noopener">Mode d'emploi</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" target="_blank" rel="noopener">Licence CC BY-NC 4.0</a><br>Piano : <a href="https://github.com/sfzinstruments/SalamanderGrandPiano" target="_blank" rel="noopener">Salamander Grand Piano V3</a> par Alexander Holm (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>)</footer>
+<footer>Pour M. Amine · Sébastien Gay · Octobre 2026 · <a href="MODE-D-EMPLOI.html" target="_blank" rel="noopener">Mode d'emploi</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" target="_blank" rel="noopener">Licence CC BY-NC 4.0</a><br>Piano : <a href="https://github.com/sfzinstruments/SalamanderGrandPiano" target="_blank" rel="noopener">Salamander Grand Piano V3</a> par Alexander Holm (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>)</footer>
 
 <script>
 'use strict';
@@ -1789,7 +1789,7 @@ function refreshTB() {
   ['tRew', 'tPlay'].forEach(id => { $(id).disabled = !song || exp.active; });
 }
 let libDb = null;
-function libOpen() { return libDb || (libDb = new Promise((ok, ko) => { try { const r = indexedDB.open('pour-m-amine-tel', 1); r.onupgradeneeded = () => r.result.createObjectStore('partitions', { keyPath: 'name' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); } catch (e) { ko(e); } })); }
+function libOpen() { return libDb || (libDb = new Promise((ok, ko) => { try { const r = indexedDB.open('pour-m-amine', 1); r.onupgradeneeded = () => r.result.createObjectStore('partitions', { keyPath: 'name' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); } catch (e) { ko(e); } })); }
 async function libTx(mode, f) { const db = await libOpen(); return new Promise((ok, ko) => { const tx = db.transaction('partitions', mode), st = tx.objectStore('partitions'), r = f(st); tx.oncomplete = () => ok(r && r.result); tx.onerror = () => ko(tx.error); }); }
 function libSave(name, buf) { libTx('readwrite', st => st.put({ name, data: buf, t: Date.now() })).then(() => { if (hdr.classList.contains('open')) libRender(); }).catch(() => {}); }
 async function libRender() {

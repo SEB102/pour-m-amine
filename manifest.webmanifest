@@ -1,7 +1,7 @@
 {
-  "name": "Pour M. Amine TEL",
+  "name": "Pour M. Amine",
   "short_name": "M. Amine",
-  "description": "Pour M. Amine, version téléphone",
+  "description": "Pour M. Amine : rouleau de piano d'apprentissage",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
