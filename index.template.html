@@ -329,7 +329,7 @@ function initSampler() {
   }).connect(limiter); sampler.volume.value = -4;
 }
 // Latence audio : tampon du navigateur + sortie matérielle (haut-parleurs, Bluetooth…) + réglage manuel « Synchro ».
-let syncMs = 0;
+let syncMs = /Android/i.test(navigator.userAgent) ? 150 : 0;   // Android : la latence audio annoncée est sous-estimée, le son arrive en retard sur l'image
 function audioLatency() {
   try {
     const c = (typeof Tone !== 'undefined') ? Tone.getContext().rawContext : synthFallback.ctx;
