@@ -166,7 +166,7 @@
     <div class="sepv"></div>
     <div class="grp"><label for="vis" class="lab">Mesures visibles</label><select id="vis"><option selected>1</option><option>2</option></select></div>
     <div class="sepv"></div>
-    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">masquer les mains virtuelles</button> <button id="bFing" title="Masquer ou afficher les doigtés (numéros sur les notes et sur le clavier)">masquer les doigtés</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> </div>
+    <div class="grp"><button id="bM0" title="Masquer ou afficher les mains virtuelles">masquer les mains virtuelles</button> <button id="bFing" title="Masquer ou afficher les doigtés (numéros sur les notes et sur le clavier)">masquer les doigtés</button> <button id="b3d" title="Vue 3D : clavier en perspective, rouleau qui s'éloigne, mains en traits épais ; glisser pour tourner, molette pour zoomer, double-clic pour revenir (V)">vue 3D</button> <button id="bEq" title="Touches égales : les touches blanches et noires ont la même largeur dans le rouleau. Éteint : proportions d'un vrai piano">touches égales</button> </div>
     <div class="sepv"></div>
     <div class="grp"><label class="btn" for="file" title="Ouvrir une partition (.mid, .musicxml, .xml, .mxl, .mscz) ; on peut aussi la déposer sur la fenêtre">📂 Ouvrir une partition</label><input id="file" type="file"></div>
     <div class="sepv"></div>
@@ -237,7 +237,15 @@ setRange(21, 108);
 // Pour que les lignes mi|fa et si|do restent DROITES (même abscisse au fond et à l'avant), le fond est découpé par demi-octave :
 // do→mi : 5 colonnes sur 3 blanches (0,6 chacune) ; fa→si : 7 colonnes sur 4 blanches (4/7 chacune).
 const WIDX12 = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6], colU = m => { const o = Math.floor(m / 12), pc = m - o * 12; return 7 * o + (pc < 5 ? pc * 0.6 : 3 + (pc - 5) * 4 / 7); };
+// Deux affichages (bouton « touches égales ») : réaliste = blanches pleines, noires plus étroites à cheval sur la frontière ; égales = les 12 touches d'un octave ont la même largeur au fond.
+let keysEgales = false; try { const v = localStorage.getItem('amine-touches-egales'); if (v !== null) keysEgales = v === '1'; } catch (e) {}   // réglage d'origine : inégales, proportions de piano
 function keyRect(m, W) {   // colonne du fond (rouleau, noires)
+  if (!keysEgales) {
+    const ww = W / VIEW.n, o = VIEW.x0 * ww;
+    if (!isBlack(m)) return { x: whiteIdx[m] * ww - o, w: ww, black: false };
+    const bw = ww * 0.4;
+    return { x: (whiteIdx[m - 1] + 1) * ww - bw / 2 - o, w: bw, black: true };
+  }
   const ww = W / VIEW.n, w0 = isBlack(FIRST) ? FIRST + 1 : FIRST, c0 = 7 * Math.floor(w0 / 12) + WIDX12[w0 % 12] - whiteIdx[w0];
   const pc = m % 12;
   return { x: (colU(m) - c0 - VIEW.x0) * ww, w: (pc < 5 ? 0.6 : 4 / 7) * ww, black: isBlack(m) };
@@ -245,6 +253,7 @@ function keyRect(m, W) {   // colonne du fond (rouleau, noires)
 // abscisse des mains : une touche blanche vise le centre de son devant, une noire le centre de sa colonne (interpolation linéaire entre touches voisines)
 let handMap = null;
 function handU(u) {
+  if (!keysEgales) return u - (PianoHands.ux(FIRST) - 0.5);
   const key = FIRST + '/' + LAST;
   if (!handMap || handMap.key !== key) {
     const w0 = isBlack(FIRST) ? FIRST + 1 : FIRST, c0 = 7 * Math.floor(w0 / 12) + WIDX12[w0 % 12] - whiteIdx[w0], a = [], b = [];
@@ -1537,10 +1546,10 @@ const setT = (e, t) => { if (e.textContent !== t) e.textContent = t; };
 function refreshBar() {
   refreshTB();
   { const k = $('kz'), v = song && !writeOn && !view3dOn && rollVisible ? 'flex' : 'none'; if (k.style.display !== v) k.style.display = v; }   // menu flottant des touches : lecture 2D seulement
-  ['bM0', 'vis'].forEach(id => { const b = $(id); if (b && b.disabled !== view3dOn) b.disabled = view3dOn; });   // grisés en vue 3D (mains virtuelles et mesures visibles sans effet)
+  ['bM0', 'vis', 'bEq'].forEach(id => { const b = $(id); if (b && b.disabled !== view3dOn) b.disabled = view3dOn; });   // grisés en vue 3D (mains virtuelles et mesures visibles sans effet)
   const on = (id, v) => $(id).classList.toggle('pressed', !!v);
   on('bPre', preListen); on('bCount', countIn); setT($('bM0'), handsMode === 'off' ? 'afficher les mains virtuelles' : 'masquer les mains virtuelles'); on('bAnt', anticip); on('bM0', handsMode === 'off');
-  on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhL', showL); on('bhR', showR);
+  on('bEq', keysEgales); on('bZoom', zoomAuto); on('bRoll', rollVisible); on('bPanel', panelOpen); on('bKeep', keepOther); on('bhL', showL); on('bhR', showR);
   [['bs25', 0.25], ['bs50', 0.5], ['bs75', 0.75], ['bs100', 1]].forEach(([id, v]) => on(id, Math.abs(speed - v) < 1e-9));
   setT($('bPlay'), playing ? '⏸ Pause' : '▶ Lecture'); on('bPlay', playing);
   setT($('bSpd'), '×' + speed.toFixed(2).replace('.', ','));
@@ -1552,6 +1561,7 @@ $('bSld').oninput = () => setSpeed(+$('bSld').value);
 $('bhL').onclick = () => { showL = !showL; }; $('bhR').onclick = () => { showR = !showR; };
 
 $('bFing').onclick = () => setFingMode(showFing ? 'off' : (lastOn || 'simple'));
+$('bEq').onclick = () => { keysEgales = !keysEgales; try { localStorage.setItem('amine-touches-egales', keysEgales ? '1' : '0'); } catch (e) {} refreshBar(); };
 $('b3d').onclick = toggle3D; $('bM0').onclick = () => setHandsMode(handsMode === 'off' ? 'plain' : 'off');
 
 // ---------- Écriture directement dans le rouleau ----------
