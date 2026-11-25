@@ -10,6 +10,11 @@
   header.top { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
   a.dl { background:#4a63e0; color:#fff; text-decoration:none; font-weight:600; padding:10px 18px; border-radius:10px; white-space:nowrap; }
   a.dl:hover { background:#6178f0; }
+  .hr { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .lang { display:inline-flex; border:1px solid #4a5280; border-radius:999px; overflow:hidden; }
+  .lang a { padding:8px 16px; color:#aeb6d8; text-decoration:none; font-weight:600; font-size:14px; }
+  .lang a.on { background:#fff; color:#0e1120; }
+  .lang a:not(.on):hover { background:#252b4a; color:#fff; }
   header.top h1 { margin:0 0 4px; font-size:32px; letter-spacing:.08em; }
   header.top p { margin:0; color:#aeb6d8; }
   nav.toc { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 24px; margin-bottom:28px; }
@@ -39,12 +44,12 @@
   ul { padding-left:22px; } li { margin:4px 0; }
   footer { text-align:center; color:var(--muted); font-size:13px; margin-top:30px; letter-spacing:.1em; }
   @page { size: A4; margin: 16mm 14mm 18mm; @bottom-center { content: counter(page) " / " counter(pages); font: 11px -apple-system, Helvetica, Arial, sans-serif; color: #5b6280; } }
-  @media print { a.dl { display:none !important; } body { background:#fff; } .page { padding:0; } section.step { break-inside:avoid; box-shadow:none; } header.top, figure img { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  @media print { a.dl, .lang { display:none !important; } body { background:#fff; } .page { padding:0; } section.step { break-inside:avoid; box-shadow:none; } header.top, figure img { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
   @media (max-width:640px) { nav.toc ol { columns:1; } }
   @media print { section.step { break-inside:auto !important; } figure, tr, .tip, .warn { break-inside:avoid; } h2, h3 { break-after:avoid; } section.step > h2 { display:block; break-inside:avoid; } section.step > h2 .num { display:inline-flex; vertical-align:middle; margin-right:12px; } figure img { max-height:215mm; width:auto; max-width:100%; } table tr:first-child { break-after:avoid; } thead { display:table-header-group; } }
 </style></head><body><div class="page">
 
-<header class="top"><div><h1>POUR M. AMINE</h1><p>Mode d'emploi pas à pas · Sébastien Gay · Novembre 2026</p><p style="font-size:13px;margin-top:4px">Licence <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" style="color:#aeb6d8">CC BY-NC 4.0</a> · © 2026 Sébastien Gay</p></div><a class="dl" href="MODE-D-EMPLOI.pdf" download="Pour-M-Amine-mode-d-emploi.pdf">⬇ Télécharger le PDF</a></header>
+<header class="top"><div><h1>POUR M. AMINE</h1><p>Mode d'emploi pas à pas · Sébastien Gay · Novembre 2026</p><p style="font-size:13px;margin-top:4px">Licence <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr" style="color:#aeb6d8">CC BY-NC 4.0</a> · © 2026 Sébastien Gay</p></div><div class="hr"><div class="lang" role="group" aria-label="Langue / Language"><a class="on" href="MODE-D-EMPLOI.html" aria-current="true" lang="fr">Français</a><a href="USER-GUIDE.html" lang="en" hreflang="en">English</a></div><a class="dl" href="MODE-D-EMPLOI.pdf" download="Pour-M-Amine-mode-d-emploi.pdf">⬇ Télécharger le PDF</a></div></header>
 
 
 <nav class="toc"><h2>Sommaire</h2><ol start="0">
